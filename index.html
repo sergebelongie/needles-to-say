@@ -207,7 +207,7 @@ console.log('Valid word pairs:', validWordPairs);
     const randomIndex = Math.floor(Math.random() * validWordPairs.length);
     const randomPair = validWordPairs[randomIndex];
     const dummyClue = "This is a placeholder clue for testing."; // Use the dummy clue
-    clueElement.textContent = "Hint: " + dummyClue;
+    const clueElement = document.getElementById("result");
     currentWordPair = randomPair;
 }
 
