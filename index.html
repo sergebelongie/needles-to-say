@@ -124,6 +124,11 @@
 </div>
 
 <script>
+
+    // Placeholder clue for testing
+    const dummyClue = "This is a placeholder clue for testing.";
+
+    
     // Sample Data
     const wordPairs = [
       {
@@ -149,6 +154,45 @@
         }
     }
 
+    // Array to store the extracted words from the text file
+let wordList = [];
+
+// Load the text file and extract the words
+async function loadWordList() {
+    try {
+        const response = await fetch('data/spreadthewordlist.txt');
+        const text = await response.text();
+        // Split the text by lines and extract words
+        const lines = text.split('\n');
+        wordList = lines.map(line => line.split(';')[0].trim());
+        console.log('Word list loaded:', wordList);
+    } catch (error) {
+        console.error('Error loading word list:', error);
+    }
+}
+
+// Call the function to load the word list
+loadWordList();
+
+// Generate valid word pairs from the loaded word list
+function generateValidWordPairs(wordList) {
+    const validPairs = [];
+
+    for (const word of wordList) {
+        // Check if the second word is valid (dropping the last letter)
+        const secondWord = word.substring(0, word.length - 1);
+        if (wordList.includes(secondWord)) {
+            validPairs.push({ first: word, second: secondWord });
+        }
+    }
+
+    return validPairs;
+}
+
+// Call the function to generate valid word pairs
+const validWordPairs = generateValidWordPairs(wordList);
+console.log('Valid word pairs:', validWordPairs);
+
     // Initialize Game
     function initializeGame() {
         document.getElementById("playAgain").style.display = "none";
@@ -160,14 +204,13 @@
 
     // Display Current Clue
     function displayClue() {
-        const clueElement = document.getElementById("clueDisplay");
-        if (!clueElement) {
-            console.error("Couldn't find the element with ID 'clueDisplay'.");
-            return;
-        }
-        clueElement.textContent = wordPairs[currentPairIndex].clue;
-        console.log("Displaying clue:", wordPairs[currentPairIndex].clue);
-    }
+    const randomIndex = Math.floor(Math.random() * validWordPairs.length);
+    const randomPair = validWordPairs[randomIndex];
+    const dummyClue = "This is a placeholder clue for testing."; // Use the dummy clue
+    clueElement.textContent = "Hint: " + dummyClue;
+    currentWordPair = randomPair;
+}
+
 
     function checkGuess() {
         const guessFirstElem = document.getElementById("guessFirst");
