@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Needles to Say</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #FDF3D8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 50px;
+            color: #3B3B3B;
+        }
+
+        #gameTitle {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 10px; /* Adjust spacing between game title and hint */
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        #hint {
+            font-size: 1.2em;
+            margin-bottom: 20px; /* Add some space below the hint */
+        }
+
+        #inputContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="text"], button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1.2em;
+            border: 1px solid #ccc;
+            background-color: #E8E4D5;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            background-color: #FFF;
+            outline: none;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #D6CBB3;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+            transition: color 0.3s ease;
+        }
+
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #rulesContainer {
+            background-color: #E8E4D5;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameTitle">
+    <h1>Needles to Say</h1>
+</div>
+
+<p id="hint">Hint: <span id="clueDisplay"></span></p>
+
+<div id="inputContainer">
+    <input type="text" id="guessFirst" placeholder="First word">
+    <input type="text" id="guessSecond" placeholder="Second word">
+</div>
+
+<button onclick="checkGuess()">Submit Guess</button>
+<button id="playAgain" onclick="initializeGame()" style="display: none;">Play Again</button>
+
+<p id="feedback"></p>
+
+<div id="splashScreen">
+    <div id="rulesContainer">
+        <h2>Welcome to &ldquo;Needles to Say&rdquo;!</h2>
+        <p>Given a clue, guess a word pair in which the second word is obtained by dropping the last letter of the first word. Both words must be common in English.</p>
+        <p>For example, for the clue &ldquo;Unnecessary sewing implement&rdquo;, the answer is &ldquo;needless needles&rdquo;.</p>
+        <button onclick="dismissSplash()">Got it!</button>
+    </div>
+</div>
+
+<script>
+    // Sample Data
+    const wordPairs = [
+      {
+        clue: "Unnecessary sewing implement",
+        first: "needless",
+        second: "needles"
+      },
+      {
+        clue: "Five o'clock shadow grizzly",
+        first: "beard",
+        second: "bear"
+      }
+    ];
+
+    // Game State
+    let currentPairIndex = 0;
+    let attempts = 0;
+    let maxAttempts = 3;
+
+    function handleKeyPress(event) {
+        if (event.keyCode === 13) {  // 13 is the keyCode for the "Enter" key
+            checkGuess();
+        }
+    }
+
+    // Initialize Game
+    function initializeGame() {
+        document.getElementById("playAgain").style.display = "none";
+        console.log("Initializing game...");
+        currentPairIndex = 0;
+        attempts = 0;
+        displayClue();
+    }
+
+    // Display Current Clue
+    function displayClue() {
+        const clueElement = document.getElementById("clueDisplay");
+        if (!clueElement) {
+            console.error("Couldn't find the element with ID 'clueDisplay'.");
+            return;
+        }
+        clueElement.textContent = wordPairs[currentPairIndex].clue;
+        console.log("Displaying clue:", wordPairs[currentPairIndex].clue);
+    }
+
+    function checkGuess() {
+        const guessFirstElem = document.getElementById("guessFirst");
+        const guessSecondElem = document.getElementById("guessSecond");
+
+        const guessFirst = guessFirstElem.value.toLowerCase();
+        const guessSecond = guessSecondElem.value.toLowerCase();
+        const currentPair = wordPairs[currentPairIndex];
+
+        if (guessFirst === currentPair.first.toLowerCase() && guessSecond === currentPair.second.toLowerCase()) {
+            document.getElementById("feedback").textContent = "Correct!";
+            moveToNextClue();
+        } else {
+            attempts++;
+            if (attempts < maxAttempts) {
+                document.getElementById("feedback").textContent = "Incorrect. Try again.";
+            } else {
+                document.getElementById("feedback").textContent = "Max attempts reached. The correct answer was: " + currentPair.first + " " + currentPair.second;
+                moveToNextClue();
+            }
+        }
+
+        // Clear the input fields and set focus back to the first input field
+        guessFirstElem.value = "";
+        guessSecondElem.value = "";
+        guessFirstElem.focus();
+    }
+
+    function moveToNextClue() {
+        currentPairIndex++;
+        if (currentPairIndex < wordPairs.length) {
+            displayClue();
+        } else {
+            document.getElementById("feedback").textContent = "Game Over! Would you like to play again?";
+            document.getElementById("playAgain").style.display = "block";
+        }
+    }
+
+    function dismissSplash() {
+        document.getElementById("splashScreen").style.display = "none";
+        document.getElementById("guessFirst").focus();
+    }
+
+    // Set up event listener for Enter key
+    document.addEventListener("keydown", handleKeyPress);
+    
+    // Initialize the game when the page loads
+    window.onload = initializeGame();
+</script>
+
+</body>
+</html>
